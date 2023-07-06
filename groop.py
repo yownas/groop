@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     # Read target
     tgt_img = cv2.imread(params.target)
-    tgt_face = sorted(get_face_analyser().get(tgt_img), key=lambda x: x.bbox[0])[0]
+    tgt_faces = sorted(get_face_analyser().get(tgt_img), key=lambda x: x.bbox[0])
 
     # Read input
     x = iio.immeta(params.input)
@@ -50,8 +50,11 @@ if __name__ == "__main__":
         ret, frame = gif.read()
         if not ret:
             break
-        out_face = sorted(get_face_analyser().get(frame), key=lambda x: x.bbox[0])[0]
-        frame = get_face_swapper().get(frame, out_face, tgt_face, paste_back=True)
+        out_faces = sorted(get_face_analyser().get(frame), key=lambda x: x.bbox[0])
+        idx = 0
+        for out_face in out_faces:
+            frame = get_face_swapper().get(frame, out_face, tgt_faces[idx%len(tgt_faces)], paste_back=True)
+            idx+=1
         out_imgs.append(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
 
     # Write output
