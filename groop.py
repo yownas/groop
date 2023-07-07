@@ -1,3 +1,6 @@
+import os
+os.environ['OMP_NUM_THREADS'] = '1'
+import torch
 import onnxruntime
 import insightface
 import imageio.v3 as iio
