@@ -20,6 +20,7 @@ def get_face_swapper():
         model_path = 'inswapper_128.onnx'
         with open(os.devnull, 'w') as sys.stdout:
             FACE_SWAPPER = insightface.model_zoo.get_model(model_path, download=False, download_zip=False, providers=ONNX_PROVIDERS)
+        sys.stdout = sys.__stdout__
     return FACE_SWAPPER
 
 def get_face_analyser():
@@ -28,10 +29,12 @@ def get_face_analyser():
         with open(os.devnull, 'w') as sys.stdout:
             FACE_ANALYSER = insightface.app.FaceAnalysis(name='buffalo_l', providers=ONNX_PROVIDERS)
             FACE_ANALYSER.prepare(ctx_id=0, det_size=(640, 640))
+        sys.stdout = sys.__stdout__
     return FACE_ANALYSER
 
 if __name__ == "__main__":
-    warnings.simplefilter("ignore")
+    warnings.filterwarnings('ignore', category=FutureWarning, module='insightface')
+    warnings.filterwarnings('ignore', category=UserWarning, module='torchvision')
     out_imgs = []
     ONNX_PROVIDERS = onnxruntime.get_available_providers()
     #print(f"Providers: {ONNX_PROVIDERS}")
@@ -66,5 +69,6 @@ if __name__ == "__main__":
         out_imgs.append(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
 
     # Write output
+    print(f"Saving as {params.output}")
     out_imgs[0].save(params.output, save_all=True, append_images=out_imgs[1:], optimize=True, duration=duration, loop=loop)
 
