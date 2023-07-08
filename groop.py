@@ -7,6 +7,8 @@ import imageio.v3 as iio
 from PIL import Image
 import argparse
 import cv2
+import sys
+import warnings
 
 FACE_ANALYSER = None
 FACE_SWAPPER = None
@@ -16,20 +18,23 @@ def get_face_swapper():
     global FACE_SWAPPER
     if FACE_SWAPPER is None:
         model_path = 'inswapper_128.onnx'
-        FACE_SWAPPER = insightface.model_zoo.get_model(model_path, download=False, download_zip=False, providers=ONNX_PROVIDERS)
+        with open(os.devnull, 'w') as sys.stdout:
+            FACE_SWAPPER = insightface.model_zoo.get_model(model_path, download=False, download_zip=False, providers=ONNX_PROVIDERS)
     return FACE_SWAPPER
 
 def get_face_analyser():
     global FACE_ANALYSER
     if FACE_ANALYSER is None:
-        FACE_ANALYSER = insightface.app.FaceAnalysis(name='buffalo_l', providers=ONNX_PROVIDERS)
-        FACE_ANALYSER.prepare(ctx_id=0, det_size=(640, 640))
+        with open(os.devnull, 'w') as sys.stdout:
+            FACE_ANALYSER = insightface.app.FaceAnalysis(name='buffalo_l', providers=ONNX_PROVIDERS)
+            FACE_ANALYSER.prepare(ctx_id=0, det_size=(640, 640))
     return FACE_ANALYSER
 
 if __name__ == "__main__":
+    warnings.simplefilter("ignore")
     out_imgs = []
     ONNX_PROVIDERS = onnxruntime.get_available_providers()
-    print(f"Providers: {ONNX_PROVIDERS}")
+    #print(f"Providers: {ONNX_PROVIDERS}")
 
     parser = argparse.ArgumentParser(description="groop")
     parser.add_argument("-t", "--target", type = str, required = True, help="target face")
